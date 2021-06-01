@@ -3,6 +3,8 @@ package listeners;
 import command.Command;
 import command.commands.CommandContainer;
 import command.commands.CommandExecutor;
+import command.commands.HelpCommand;
+import exceptions.CommandNotFoundException;
 import exceptions.SoundNotFoundException;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -34,9 +36,13 @@ public class MessageListener extends ListenerAdapter {
     private void onGuildMessageReceived0(GuildMessageReceivedEvent event) throws SoundNotFoundException {
         CommandContainer container = new CommandContainer(sender);
         if (getMessage().startsWith(COMMAND_PREFIX) && !event.getAuthor().isBot()) {
-            command = container.getRetrieveCommand(message);
-            executor.executeCommand(command, event);
-
+            try {
+                command = container.getRetrieveCommand(message);
+                executor.executeCommand(command, event);
+            } catch (CommandNotFoundException e) {
+                HelpCommand helpCommand = new HelpCommand(sender);
+                helpCommand.execute(event);
+            }
         }
     }
 

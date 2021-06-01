@@ -3,57 +3,64 @@ package command.commands;
 import command.Command;
 import connnect.ConnectToTheVoiceChannelService;
 import exceptions.SoundNotFoundException;
+import lavaplayer.PlayerManager;
+import music.SearchVideoOnYoutubeImpl;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.managers.AudioManager;
-import playsound.Playable;
-import queue.SongsQueue;
 import sendmessages.SendMessageInterface;
 
-import java.util.LinkedList;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-public class PlayCommand implements Command, Playable {
+public class PlayCommand implements Command {
 
     private SendMessageInterface sendMessageInterface;
-    private SongsQueue queue;
-    private VoiceChannel channel;
-    private AudioManager audioManager;
     private GuildMessageReceivedEvent event;
     private ConnectToTheVoiceChannelService connect;
+    private PlayerManager playerManager;
+    private SearchVideoOnYoutubeImpl youtubeMusicSearcher;
 
     public PlayCommand(SendMessageInterface sendMessageInterface) {
         this.sendMessageInterface = sendMessageInterface;
-        queue = new SongsQueue(new LinkedList<>());
+        this.playerManager = new PlayerManager();
+        this.youtubeMusicSearcher = new SearchVideoOnYoutubeImpl();
     }
 
     @Override
-    public void execute(GuildMessageReceivedEvent event) {
+    public void execute(GuildMessageReceivedEvent event) throws SoundNotFoundException {
         this.event = event;
         this.connect = new ConnectToTheVoiceChannelService();
-        String url = "";
-        try {
-           url = getSongUrl(event.getMessage().getContentRaw());
-            queue.addSongToQueue(url);
-        } catch (SoundNotFoundException e) {
-            System.out.println("sound message error");
-            return;
-        }
-        sendMessageInterface.sendMessage(event, "Now playing: " + url);
-
+        String url = getSongUrl(event.getMessage().getContentRaw());
         connect.connectToTheVoiceChannel(event);
-        play(url);
-    }
-
-    @Override
-    public void play(String str)  {
-
+        PlayerManager.getInstance().setEvent(event);
+        try {
+            distribution(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        PlayerManager.getInstance()
+                .getMusicManager(event.getGuild())
+                .getScheduler().setEvent(event);
     }
 
     private String getSongUrl(String s) throws SoundNotFoundException {
-        String[] song = s.split(" ");
-        if (song.length > 1)
-            return song[1].trim();
+        if(s.length() >= 5)
+            return s.substring(5).trim();
         sendMessageInterface.sendMessage(event, "enter sound name");
         throw new SoundNotFoundException();
+    }
+    public void play(String trackUrl)  {
+        PlayerManager.getInstance().loadAndPlay(event.getChannel(), trackUrl);
+    }
+
+    private void distribution(String text) throws IOException {
+        try {
+            new URL(text);
+            play(text);
+        } catch (MalformedURLException e) {
+            play(youtubeMusicSearcher.searchVideoByKeyword(text));
+        }
     }
 }
