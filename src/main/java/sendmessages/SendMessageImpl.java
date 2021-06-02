@@ -19,7 +19,7 @@ public class SendMessageImpl implements SendMessageInterface {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Now playing");
         builder.setDescription("[" + track.getInfo().title + "]" + "(" + track.getInfo().uri + ")");
-        builder.setColor(Color.CYAN);
+        builder.setColor(Color.PINK);
         return builder;
     }
 
