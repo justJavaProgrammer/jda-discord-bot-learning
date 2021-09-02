@@ -14,7 +14,7 @@ import sendmessages.SendMessageInterface;
 public class MessageListener extends ListenerAdapter {
 
     private final String COMMAND_PREFIX = "/";
-    private String message;
+    private static String message;
     private SendMessageInterface sender;
     private Command command;
     private CommandExecutor executor;
@@ -46,7 +46,7 @@ public class MessageListener extends ListenerAdapter {
         }
     }
 
-    public String getMessage() {
+    public static String getMessage() {
         return message;
     }
 }
