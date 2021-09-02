@@ -13,6 +13,8 @@ public enum Commands {
     HELP("/help"),
     RANDOM("/random"),
     LYRICS("/lyrics");
+  //  LOOP("/loop"),
+  //  UNLOOP("/unloop");
 
     private String command;
 
