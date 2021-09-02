@@ -21,6 +21,7 @@ public class TrackScheduler extends AudioEventAdapter {
     private GuildMessageReceivedEvent event;
     private SendMessageImpl sender;
     private AudioTrack head;
+    private boolean stopLoop = false;
 
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
@@ -91,6 +92,17 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public void sendEmbedMessage(GuildMessageReceivedEvent event) {
         event.getChannel().sendMessage(sender.sendEmbedMessage(this.track).build()).queue();
+    }
+
+    public void loop() {
+        AudioTrack track = head;
+        while(stopLoop) {
+            player.startTrack(track.makeClone(), true);
+        }
+    }
+    public void setStopLoop(boolean stopLoop) {
+        System.out.println("set stop loop");
+        this.stopLoop = stopLoop;
     }
     public AudioTrack getTrack() {
         return this.head;

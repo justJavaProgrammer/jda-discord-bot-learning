@@ -22,7 +22,7 @@ public class SkipCommand implements Command {
     @Override
     public void execute(GuildMessageReceivedEvent event) throws SoundNotFoundException {
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("Skip song").setColor(Color.BLUE);
+        builder.setTitle("Skip song").setColor(Color.PINK);
         event.getChannel().sendMessage(sender.sendEmbedMessage(builder.build()).build()).queue();
         PlayerManager.getInstance().getMusicManager(event.getGuild()).getScheduler().skip();
     }
